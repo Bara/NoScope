@@ -1,0 +1,20 @@
+"Updater"
+{
+	"Information"
+	{
+		"Version"
+		{
+			"Latest"	"1.0.0"
+		}
+		
+		"Notes"	"Release"
+	}
+	
+	"Files"
+	{
+		"Plugin"	"Path_SM/plugins/noscope.smx"
+		"Plugin"	"Path_SM/translations/noscope.phrases.txt"
+		
+		"Source"	"Path_SM/scripting/onlyhs.sp"
+	}
+}
