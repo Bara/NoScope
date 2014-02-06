@@ -6,7 +6,7 @@
 #include <autoexecconfig>
 #include <updater>
 
-#define NOSCOPE_VERSION  "1.0.0"
+#define NOSCOPE_VERSION  "1.0.1"
 #define UPDATE_URL    "http://update.bara.in/noscope.txt"
 
 new Handle:g_hEnablePlugin = INVALID_HANDLE,
@@ -20,6 +20,8 @@ new Handle:g_hEnablePlugin = INVALID_HANDLE,
 new String:g_sAllowedWeapon[32],
 	String:g_sGrenade[32],
 	String:g_sWeapon[32];
+
+new m_flNextSecondaryAttack;
 
 public Plugin:myinfo =
 {
@@ -54,13 +56,14 @@ public OnPluginStart()
 	AutoExecConfig_ExecuteFile();
 	AutoExecConfig_CleanFile();
 
-	HookEvent("weapon_zoom", Event_WeaponZoom);
+	m_flNextSecondaryAttack = FindSendPropOffs("CBaseCombatWeapon", "m_flNextSecondaryAttack");
 
 	for(new i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientValid(i))
 		{
 			SDKHook(i, SDKHook_OnTakeDamage, OnTakeDamage);
+			SDKHook(i, SDKHook_PreThink, OnPreThink);
 		}
 	}
 
@@ -81,26 +84,14 @@ public OnLibraryAdded(const String:name[])
 public OnClientPutInServer(i)
 {
 	SDKHook(i, SDKHook_OnTakeDamage, OnTakeDamage);
+	SDKHook(i, SDKHook_PreThink, OnPreThink);
 }
 
-public Action:Event_WeaponZoom(Handle:event,const String:name[], bool:dontBroadcast)
+public Action:OnPreThink(client)
 {
-	if(GetConVarInt(g_hEnablePlugin))
-	{
-		new client = GetClientOfUserId(GetEventInt(event, "userid"));
-		new weapon = GetPlayerWeaponSlot(client, 0);
-
-		GetConVarString(g_hAllowedWeapon, g_sAllowedWeapon, sizeof(g_sAllowedWeapon));
-		if (IsValidEdict(weapon))
-		{
-			PrintCenterText(client, "%T", "Zoomed", client);
-			
-			RemovePlayerItem(client, weapon);
-			RemoveEdict(weapon);
-			
-			GivePlayerItem(client, g_sAllowedWeapon);
-		}
-	}
+	new iWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	SetNoScope(iWeapon);
+	return Plugin_Continue;
 }
 
 public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype, &weapon, Float:damageForce[3], Float:damagePosition[3])
@@ -182,6 +173,23 @@ public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 	else
 	{
 		return Plugin_Continue;
+	}
+}
+
+stock SetNoScope(weapon)
+{
+	if(IsValidEdict(weapon))
+	{
+		decl String:classname[MAX_NAME_LENGTH];
+
+		if (GetEdictClassname(weapon, classname, sizeof(classname))
+		|| StrEqual(classname[7], "ssg08")  || StrEqual(classname[7], "aug")
+		|| StrEqual(classname[7], "sg550")  || StrEqual(classname[7], "sg552")
+		|| StrEqual(classname[7], "sg556")  || StrEqual(classname[7], "awp")
+		|| StrEqual(classname[7], "scar20") || StrEqual(classname[7], "g3sg1"))
+		{
+			SetEntDataFloat(weapon, m_flNextSecondaryAttack, GetGameTime() + 1.0);
+		}
 	}
 }
 
