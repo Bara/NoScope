@@ -4,10 +4,10 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.0.1"
+			"Latest"	"1.0.3"
 		}
 		
-		"Notes"	"New method to prevent scope ( Thanks to Root_ )"
+		"Notes"	"Updated UPDATE_URL"
 	}
 	
 	"Files"

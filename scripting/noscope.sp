@@ -6,8 +6,8 @@
 #include <autoexecconfig>
 #include <updater>
 
-#define NOSCOPE_VERSION  "1.0.1"
-#define UPDATE_URL    "http://update.bara.in/noscope.txt"
+#define NOSCOPE_VERSION  "1.0.3"
+#define UPDATE_URL    "http://bara.in/update/noscope.txt"
 
 new Handle:g_hEnablePlugin = INVALID_HANDLE,
 	Handle:g_hEnableOneShot = INVALID_HANDLE,
