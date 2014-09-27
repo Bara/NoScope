@@ -1,0 +1,8 @@
+"Phrases"
+{
+	"Zoomed"
+	{
+		"en"		"Scope not allowed!"
+		"de"		"Scope ist nicht erlaubt!"
+	}
+}
