@@ -3,7 +3,6 @@
 #include <sourcemod>
 #include <sdkhooks>
 #include <sdktools>
-#include <autoexecconfig>
 #include <updater>
 
 #pragma newdecls required
@@ -37,21 +36,17 @@ public void OnPluginStart()
 		SetFailState("Only CSS and CSGO Support");
 	}
 	
-	AutoExecConfig_SetFile("plugin.noscope", "sourcemod");
-	AutoExecConfig_SetCreateFile(true);
-	
 	CreateConVar("noscope_version", NOSCOPE_VERSION, "NoScope", FCVAR_NOTIFY | FCVAR_DONTRECORD);
 	
-	g_cEnablePlugin = AutoExecConfig_CreateConVar("noscope_enable", "1", "Enable / Disalbe NoScope Plugin", _, true, 0.0, true, 1.0);
-	g_cEnableOneShot = AutoExecConfig_CreateConVar("noscope_oneshot", "0", "Enable / Disable kill enemy with one shot", _, true, 0.0, true, 1.0);
-	g_cEnableWeapon = AutoExecConfig_CreateConVar("noscope_oneweapon", "1", "Enable / Disalbe Only One Weapon Damage", _, true, 0.0, true, 1.0);
-	g_cAllowGrenade = AutoExecConfig_CreateConVar("noscope_allow_grenade", "0", "Enable / Disalbe Grenade Damage", _, true, 0.0, true, 1.0);
-	g_cAllowWorld = AutoExecConfig_CreateConVar("noscope_allow_world", "0", "Enable / Disalbe World Damage", _, true, 0.0, true, 1.0);
-	g_cAllowMelee = AutoExecConfig_CreateConVar("noscope_allow_knife", "0", "Enable / Disalbe Knife Damage", _, true, 0.0, true, 1.0);
-	g_cAllowedWeapons = AutoExecConfig_CreateConVar("noscope_allow_weapons", "awp;scout", "What weapon should the player get back after it has zoomed?");
+	g_cEnablePlugin = CreateConVar("noscope_enable", "1", "Enable / Disalbe NoScope Plugin", _, true, 0.0, true, 1.0);
+	g_cEnableOneShot = CreateConVar("noscope_oneshot", "0", "Enable / Disable kill enemy with one shot", _, true, 0.0, true, 1.0);
+	g_cEnableWeapon = CreateConVar("noscope_oneweapon", "1", "Enable / Disalbe Only One Weapon Damage", _, true, 0.0, true, 1.0);
+	g_cAllowGrenade = CreateConVar("noscope_allow_grenade", "0", "Enable / Disalbe Grenade Damage", _, true, 0.0, true, 1.0);
+	g_cAllowWorld = CreateConVar("noscope_allow_world", "0", "Enable / Disalbe World Damage", _, true, 0.0, true, 1.0);
+	g_cAllowMelee = CreateConVar("noscope_allow_knife", "0", "Enable / Disalbe Knife Damage", _, true, 0.0, true, 1.0);
+	g_cAllowedWeapons = CreateConVar("noscope_allow_weapons", "awp;scout", "What weapon should the player get back after it has zoomed?");
 	
-	AutoExecConfig_ExecuteFile();
-	AutoExecConfig_CleanFile();
+	AutoExecConfig();
 	
 	m_flNextSecondaryAttack = FindSendPropOffs("CBaseCombatWeapon", "m_flNextSecondaryAttack");
 	
