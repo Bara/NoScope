@@ -6,103 +6,100 @@
 #include <autoexecconfig>
 #include <updater>
 
-#define NOSCOPE_VERSION  "1.0.3"
-#define UPDATE_URL    "https://bara.in/update/noscope.txt"
+#pragma newdecls required
 
-new Handle:g_hEnablePlugin = INVALID_HANDLE,
-	Handle:g_hEnableOneShot = INVALID_HANDLE,
-	Handle:g_hEnableWeapon = INVALID_HANDLE,
-	Handle:g_hAllowGrenade = INVALID_HANDLE,
-	Handle:g_hAllowWorld = INVALID_HANDLE,
-	Handle:g_hAllowMelee = INVALID_HANDLE,
-	Handle:g_hAllowedWeapon = INVALID_HANDLE;
+#define NOSCOPE_VERSION  "2.0.0"
+// #define UPDATE_URL    "https://bara.in/update/noscope.txt"
 
-new String:g_sAllowedWeapon[32],
-	String:g_sGrenade[32],
-	String:g_sWeapon[32];
+ConVar g_cEnablePlugin = null;
+ConVar g_cEnableOneShot = null;
+ConVar g_cEnableWeapon = null;
+ConVar g_cAllowGrenade = null;
+ConVar g_cAllowWorld = null;
+ConVar g_cAllowMelee = null;
+ConVar g_cAllowedWeapons = null;
 
-new m_flNextSecondaryAttack;
+int m_flNextSecondaryAttack = -1;
 
-public Plugin:myinfo =
+public Plugin myinfo = 
 {
-	name = "NoScope",
-	author = "Bara",
-	description = "",
-	version = NOSCOPE_VERSION,
+	name = "NoScope", 
+	author = "Bara", 
+	description = "", 
+	version = NOSCOPE_VERSION, 
 	url = "www.bara.in"
 };
 
-public OnPluginStart()
+public void OnPluginStart()
 {
-	if(GetEngineVersion() != Engine_CSS && GetEngineVersion() != Engine_CSGO)
+	if (GetEngineVersion() != Engine_CSS && GetEngineVersion() != Engine_CSGO)
 	{
 		SetFailState("Only CSS and CSGO Support");
 	}
-
-	LoadTranslations("noscope.phrases");
-
+	
 	AutoExecConfig_SetFile("plugin.noscope", "sourcemod");
 	AutoExecConfig_SetCreateFile(true);
-
-	CreateConVar("noscope_version", NOSCOPE_VERSION, "NoScope", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	g_hEnablePlugin = AutoExecConfig_CreateConVar("noscope_enable", "1", "Enable / Disalbe NoScope Plugin", _, true, 0.0, true, 1.0);
-	g_hEnableOneShot = AutoExecConfig_CreateConVar("noscope_oneshot", "0", "Enable / Disable kill enemy with one shot", _, true, 0.0, true, 1.0);
-	g_hEnableWeapon = AutoExecConfig_CreateConVar("noscope_oneweapon", "1", "Enable / Disalbe Only One Weapon Damage", _, true, 0.0, true, 1.0);
-	g_hAllowGrenade = AutoExecConfig_CreateConVar("noscope_allow_grenade", "0", "Enable / Disalbe Grenade Damage", _, true, 0.0, true, 1.0);
-	g_hAllowWorld = AutoExecConfig_CreateConVar("noscope_allow_world", "0", "Enable / Disalbe World Damage", _, true, 0.0, true, 1.0);
-	g_hAllowMelee = AutoExecConfig_CreateConVar("noscope_allow_knife", "0", "Enable / Disalbe Knife Damage", _, true, 0.0, true, 1.0);
-	g_hAllowedWeapon = AutoExecConfig_CreateConVar("noscope_allow_weapon", "weapon_awp", "What weapon should the player get back after it has zoomed?");
-
+	
+	CreateConVar("noscope_version", NOSCOPE_VERSION, "NoScope", FCVAR_NOTIFY | FCVAR_DONTRECORD);
+	
+	g_cEnablePlugin = AutoExecConfig_CreateConVar("noscope_enable", "1", "Enable / Disalbe NoScope Plugin", _, true, 0.0, true, 1.0);
+	g_cEnableOneShot = AutoExecConfig_CreateConVar("noscope_oneshot", "0", "Enable / Disable kill enemy with one shot", _, true, 0.0, true, 1.0);
+	g_cEnableWeapon = AutoExecConfig_CreateConVar("noscope_oneweapon", "1", "Enable / Disalbe Only One Weapon Damage", _, true, 0.0, true, 1.0);
+	g_cAllowGrenade = AutoExecConfig_CreateConVar("noscope_allow_grenade", "0", "Enable / Disalbe Grenade Damage", _, true, 0.0, true, 1.0);
+	g_cAllowWorld = AutoExecConfig_CreateConVar("noscope_allow_world", "0", "Enable / Disalbe World Damage", _, true, 0.0, true, 1.0);
+	g_cAllowMelee = AutoExecConfig_CreateConVar("noscope_allow_knife", "0", "Enable / Disalbe Knife Damage", _, true, 0.0, true, 1.0);
+	g_cAllowedWeapons = AutoExecConfig_CreateConVar("noscope_allow_weapons", "awp;scout", "What weapon should the player get back after it has zoomed?");
+	
 	AutoExecConfig_ExecuteFile();
 	AutoExecConfig_CleanFile();
-
+	
 	m_flNextSecondaryAttack = FindSendPropOffs("CBaseCombatWeapon", "m_flNextSecondaryAttack");
-
-	for(new i = 1; i <= MaxClients; i++)
+	
+	for (int i = 1; i <= MaxClients; i++)
 	{
-		if(IsClientValid(i))
+		if (IsClientValid(i))
 		{
 			SDKHook(i, SDKHook_OnTakeDamage, OnTakeDamage);
 			SDKHook(i, SDKHook_PreThink, OnPreThink);
 		}
 	}
-
+	
 	if (LibraryExists("updater"))
 	{
-		Updater_AddPlugin(UPDATE_URL);
+		// Updater_AddPlugin(UPDATE_URL);
 	}
 }
 
-public OnLibraryAdded(const String:name[])
+public void OnLibraryAdded(const char[] name)
 {
 	if (StrEqual(name, "updater"))
 	{
-		Updater_AddPlugin(UPDATE_URL);
+		// Updater_AddPlugin(UPDATE_URL);
 	}
 }
 
-public OnClientPutInServer(i)
+public void OnClientPutInServer(int i)
 {
 	SDKHook(i, SDKHook_OnTakeDamage, OnTakeDamage);
 	SDKHook(i, SDKHook_PreThink, OnPreThink);
 }
 
-public Action:OnPreThink(client)
+public Action OnPreThink(int client)
 {
-	new iWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	int iWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 	SetNoScope(iWeapon);
 	return Plugin_Continue;
 }
 
-public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype, &weapon, Float:damageForce[3], Float:damagePosition[3])
+public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3])
 {
-	if(GetConVarInt(g_hEnablePlugin))
+	if (g_cEnablePlugin.BoolValue)
 	{
-		if(IsClientValid(victim))
+		if (IsClientValid(victim))
 		{
-			if(damagetype & DMG_FALL || attacker == 0)
+			if (damagetype & DMG_FALL || attacker == 0)
 			{
-				if(GetConVarInt(g_hAllowWorld))
+				if (g_cAllowWorld.BoolValue)
 				{
 					return Plugin_Continue;
 				}
@@ -111,63 +108,63 @@ public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 					return Plugin_Handled;
 				}
 			}
-
-			if(IsClientValid(attacker))
+			
+			if (IsClientValid(attacker))
 			{
-				GetEdictClassname(inflictor, g_sGrenade, sizeof(g_sGrenade));
-				GetClientWeapon(attacker, g_sWeapon, sizeof(g_sWeapon));
-
-				if(GetConVarInt(g_hEnableWeapon))
+				char sGrenade[32];
+				char sWeapon[32];
+				
+				GetEdictClassname(inflictor, sGrenade, sizeof(sGrenade));
+				GetClientWeapon(attacker, sWeapon, sizeof(sWeapon));
+				
+				if ((StrContains(sWeapon[7], "knife", false) != -1) || (StrContains(sWeapon[7], "bayonet", false) != -1))
 				{
-					GetConVarString(g_hAllowedWeapon, g_sAllowedWeapon, sizeof(g_sAllowedWeapon));
-
-					if(!StrEqual(g_sWeapon[7], g_sAllowedWeapon))
-					{
-						return Plugin_Handled;
-					}
-				}
-
-				if(GetConVarInt(g_hEnableOneShot))
-				{
-					damage = float(GetClientHealth(victim));
-					return Plugin_Changed;
-				}
-
-				if(GetConVarInt(g_hAllowMelee))
-				{
-					if(StrEqual(g_sWeapon, "weapon_knife"))
+					if (g_cAllowMelee.BoolValue)
 					{
 						return Plugin_Continue;
 					}
 				}
-
-				if(GetConVarInt(g_hAllowGrenade))
+				
+				if (StrEqual(sGrenade, "_projectile"))
 				{
-					if(GetEngineVersion() == Engine_CSS)
+					if (g_cAllowGrenade.BoolValue)
 					{
-						if(StrEqual(g_sGrenade, "hegrenade_projectile"))
-						{
-							return Plugin_Continue;
-						}
+						return Plugin_Continue;
 					}
-					else if(GetEngineVersion() == Engine_CSGO)
+				}
+				
+				if (g_cEnableWeapon.BoolValue)
+				{
+					char sBuffer[256], sWeapons[24][64];
+					g_cAllowedWeapons.GetString(sBuffer, sizeof(sBuffer));
+					
+					int iCount = ExplodeString(sBuffer, ";", sWeapons, sizeof(sWeapons), sizeof(sWeapons[]));
+					
+					for (int i = 0; i < iCount; i++)
 					{
-						if(StrEqual(g_sGrenade, "hegrenade_projectile") || StrEqual(g_sGrenade, "decoy_projectile") || StrEqual(g_sGrenade, "molotov_projectile"))
+						if (!StrEqual(sWeapons[i], sWeapon[7], false))
 						{
-							return Plugin_Continue;
+							return Plugin_Handled;
 						}
 					}
 				}
+				
+				if (g_cEnableOneShot.BoolValue)
+				{
+					damage = float(GetClientHealth(victim) + GetClientArmor(victim));
+					return Plugin_Changed;
+				}
+				
 				return Plugin_Continue;
 			}
 			else
 			{
-				return Plugin_Handled;
+				return Plugin_Continue;
 			}
 		}
 		else
 		{
-			return Plugin_Handled;
+			return Plugin_Continue;
 		}
 	}
 	else
@@ -176,26 +173,23 @@ public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 	}
 }
 
-stock SetNoScope(weapon)
+stock void SetNoScope(int weapon)
 {
-	if(IsValidEdict(weapon))
+	if (IsValidEdict(weapon))
 	{
-		decl String:classname[MAX_NAME_LENGTH];
-
-		if (GetEdictClassname(weapon, classname, sizeof(classname))
-		|| StrEqual(classname[7], "ssg08")  || StrEqual(classname[7], "aug")
-		|| StrEqual(classname[7], "sg550")  || StrEqual(classname[7], "sg552")
-		|| StrEqual(classname[7], "sg556")  || StrEqual(classname[7], "awp")
-		|| StrEqual(classname[7], "scar20") || StrEqual(classname[7], "g3sg1"))
+		char classname[MAX_NAME_LENGTH];
+		GetEdictClassname(weapon, classname, sizeof(classname));
+		
+		if (StrEqual(classname[7], "ssg08") || StrEqual(classname[7], "aug") || StrEqual(classname[7], "sg550") || StrEqual(classname[7], "sg552") || StrEqual(classname[7], "sg556") || StrEqual(classname[7], "awp") || StrEqual(classname[7], "scar20") || StrEqual(classname[7], "g3sg1"))
 		{
-			SetEntDataFloat(weapon, m_flNextSecondaryAttack, GetGameTime() + 1.0);
+			SetEntDataFloat(weapon, m_flNextSecondaryAttack, GetGameTime() + 2.0);
 		}
 	}
 }
 
-stock bool:IsClientValid(client)
+stock bool IsClientValid(int client)
 {
-	if(client > 0 && client <= MaxClients && IsClientInGame(client))
+	if (client > 0 && client <= MaxClients && IsClientInGame(client))
 	{
 		return true;
 	}
