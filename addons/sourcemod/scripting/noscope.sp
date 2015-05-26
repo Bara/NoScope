@@ -3,12 +3,10 @@
 #include <sourcemod>
 #include <sdkhooks>
 #include <sdktools>
-#include <updater>
 
 #pragma newdecls required
 
 #define NOSCOPE_VERSION  "2.0.0"
-// #define UPDATE_URL    "https://bara.in/update/noscope.txt"
 
 ConVar g_cEnablePlugin = null;
 ConVar g_cEnableOneShot = null;
@@ -57,19 +55,6 @@ public void OnPluginStart()
 			SDKHook(i, SDKHook_OnTakeDamage, OnTakeDamage);
 			SDKHook(i, SDKHook_PreThink, OnPreThink);
 		}
-	}
-	
-	if (LibraryExists("updater"))
-	{
-		// Updater_AddPlugin(UPDATE_URL);
-	}
-}
-
-public void OnLibraryAdded(const char[] name)
-{
-	if (StrEqual(name, "updater"))
-	{
-		// Updater_AddPlugin(UPDATE_URL);
 	}
 }
 
