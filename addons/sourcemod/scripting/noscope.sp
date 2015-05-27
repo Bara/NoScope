@@ -97,7 +97,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 				GetEdictClassname(inflictor, sGrenade, sizeof(sGrenade));
 				GetClientWeapon(attacker, sWeapon, sizeof(sWeapon));
 				
-				if ((StrContains(sWeapon[7], "knife", false) != -1) || (StrContains(sWeapon[7], "bayonet", false) != -1))
+				if ((StrContains(sWeapon, "knife", false) != -1) || (StrContains(sWeapon, "bayonet", false) != -1))
 				{
 					if (g_cAllowMelee.BoolValue)
 					{
