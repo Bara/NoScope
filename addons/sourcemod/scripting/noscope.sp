@@ -105,7 +105,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 					}
 				}
 				
-				if (StrEqual(sGrenade, "_projectile"))
+				if (StrContains(sGrenade, "_projectile", false) != -1)
 				{
 					if (g_cAllowGrenade.BoolValue)
 					{
