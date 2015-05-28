@@ -2,7 +2,6 @@
 
 #include <sourcemod>
 #include <sdkhooks>
-#include <sdktools>
 
 #pragma newdecls required
 
