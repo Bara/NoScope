@@ -5,7 +5,7 @@
 
 #pragma newdecls required
 
-#define NOSCOPE_VERSION  "2.0.0"
+#define NOSCOPE_VERSION  "2.0.1"
 
 ConVar g_cEnablePlugin = null;
 ConVar g_cEnableOneShot = null;
