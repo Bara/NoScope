@@ -98,7 +98,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 					if (g_cAllowGrenade.BoolValue)
 						return Plugin_Continue;
 				
-				char sBuffer[256], sWeapons[24][64];
+				char sBuffer[256], sWeapons[64][64];
 				g_cAllowedWeapons.GetString(sBuffer, sizeof(sBuffer));
 				
 				int iCount = ExplodeString(sBuffer, ";", sWeapons, sizeof(sWeapons), sizeof(sWeapons[]));
