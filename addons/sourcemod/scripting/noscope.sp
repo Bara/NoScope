@@ -5,7 +5,7 @@
 
 #pragma newdecls required
 
-#define NOSCOPE_VERSION  "2.0.1"
+#define NOSCOPE_VERSION  "2.0.2"
 
 ConVar g_cEnablePlugin = null;
 ConVar g_cEnableOneShot = null;
@@ -63,8 +63,11 @@ public void OnClientPutInServer(int i)
 
 public Action OnPreThink(int client)
 {
-	int iWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-	SetNoScope(iWeapon);
+	if (g_cEnablePlugin.BoolValue)
+	{
+		int iWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		SetNoScope(iWeapon);
+	}
 	return Plugin_Continue;
 }
 
