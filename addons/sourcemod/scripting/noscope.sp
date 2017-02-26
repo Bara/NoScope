@@ -41,9 +41,11 @@ public void OnPluginStart()
 	g_cAllowMelee = CreateConVar("noscope_allow_knife", "0", "Enable / Disalbe Knife Damage", _, true, 0.0, true, 1.0);
 	g_cAllowedWeapons = CreateConVar("noscope_allow_weapons", "awp;scout", "What weapon should the player get back after it has zoomed?");
 	
+	g_cEnablePlugin.AddChangeHook(ChangeHook);
+	
 	AutoExecConfig();
 	
-	m_flNextSecondaryAttack = FindSendPropOffs("CBaseCombatWeapon", "m_flNextSecondaryAttack");
+	m_flNextSecondaryAttack = FindSendPropInfo("CBaseCombatWeapon", "m_flNextSecondaryAttack");
 	
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -59,6 +61,17 @@ public void OnClientPutInServer(int i)
 {
 	SDKHook(i, SDKHook_OnTakeDamage, OnTakeDamage);
 	SDKHook(i, SDKHook_PreThink, OnPreThink);
+}
+
+public void ChangeHook(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	if(convar == g_cEnablePlugin)
+	{
+		if(view_as<bool>(StringToInt(newValue)) == false)
+		{
+			ResetScope();
+		}
+	}
 }
 
 public Action OnPreThink(int client)
@@ -134,6 +147,26 @@ stock void SetNoScope(int weapon)
 		
 		if (StrEqual(classname[7], "ssg08") || StrEqual(classname[7], "aug") || StrEqual(classname[7], "sg550") || StrEqual(classname[7], "sg552") || StrEqual(classname[7], "sg556") || StrEqual(classname[7], "awp") || StrEqual(classname[7], "scar20") || StrEqual(classname[7], "g3sg1"))
 			SetEntDataFloat(weapon, m_flNextSecondaryAttack, GetGameTime() + 2.0);
+	}
+}
+
+void ResetScope()
+{
+	for (int i = 0; i <= MaxClients; i++)
+	{
+		if(IsClientValid(i) && IsPlayerAlive(i))
+		{
+			int weapon = GetEntPropEnt(i, Prop_Send, "m_hActiveWeapon");
+			
+			if (IsValidEdict(weapon))
+			{
+				char classname[MAX_NAME_LENGTH];
+				GetEdictClassname(weapon, classname, sizeof(classname));
+				
+				if (StrEqual(classname[7], "ssg08") || StrEqual(classname[7], "aug") || StrEqual(classname[7], "sg550") || StrEqual(classname[7], "sg552") || StrEqual(classname[7], "sg556") || StrEqual(classname[7], "awp") || StrEqual(classname[7], "scar20") || StrEqual(classname[7], "g3sg1"))
+					SetEntDataFloat(weapon, m_flNextSecondaryAttack, GetGameTime() - 0.1);
+			}
+		}
 	}
 }
 
